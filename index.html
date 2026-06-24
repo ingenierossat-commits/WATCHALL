@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WATCHALL</title>
+  <meta name="theme-color" content="#1A1A1A" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --black:   #1A1A1A;
+      --beige:   #F5F0E8;
+      --beige-md:#C9B99A;
+      --beige-dk:#2A2520;
+      --white:   #FFFFFF;
+      --red:     #E63946;
+      --green:   #2DC653;
+      --card:    #222018;
+      --border:  #3A3530;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--black);
+      color: var(--beige);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── HEADER ── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      background: var(--black);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .eye-wrap {
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+    }
+
+    .eye-svg {
+      width: 36px;
+      height: 36px;
+    }
+
+    .eye-svg.pulse #pupil {
+      animation: pupilPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pupilPulse {
+      0%, 100% { r: 5; opacity: 1; }
+      50%       { r: 7; opacity: 0.7; }
+    }
+
+    .brand {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--beige);
+    }
+
+    .brand span {
+      color: var(--beige-md);
+      font-weight: 400;
+    }
+
+    .conn-badge {
+      margin-left: auto;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 4px 10px;
+      border-radius: 2px;
+      background: var(--beige-dk);
+      color: var(--beige-md);
+      border: 1px solid var(--border);
+    }
+
+    .conn-badge.online {
+      background: rgba(45,198,83,0.12);
+      color: var(--green);
+      border-color: rgba(45,198,83,0.3);
+    }
+
+    /* ── NAV TABS ── */
+    nav {
+      display: flex;
+      background: var(--black);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    nav::-webkit-scrollbar { display: none; }
+
+    .tab {
+      flex: 1;
+      min-width: 72px;
+      padding: 12px 6px 10px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--beige-md);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      text-align: center;
+    }
+
+    .tab.active {
+      color: var(--beige);
+      border-bottom-color: var(--beige-md);
+    }
+
+    .tab-icon {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 3px;
+    }
+
+    /* ── MAIN ── */
+    main {
+      flex: 1;
+      padding: 16px;
+      max-width: 600px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    /* ── ESTADO: ENTRADAS ── */
+    .entry-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 8px;
+      transition: border-color 0.3s;
+    }
+
+    .entry-row.high { border-left: 3px solid var(--green); }
+    .entry-row.low  { border-left: 3px solid var(--red); }
+
+    .entry-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--beige-md);
+      letter-spacing: 0.08em;
+      min-width: 28px;
+    }
+
+    .entry-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--beige);
+      flex: 1;
+    }
+
+    .entry-time {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 10px;
+      color: var(--beige-md);
+      text-align: right;
+      min-width: 60px;
+    }
+
+    .state-badge {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 4px 10px;
+      border-radius: 2px;
+      min-width: 52px;
+      text-align: center;
+    }
+
+    .state-badge.high {
+      background: rgba(45,198,83,0.15);
+      color: var(--green);
+      border: 1px solid rgba(45,198,83,0.3);
+    }
+
+    .state-badge.low {
+      background: rgba(230,57,70,0.15);
+      color: var(--red);
+      border: 1px solid rgba(230,57,70,0.3);
+    }
+
+    .no-entries {
+      text-align: center;
+      color: var(--beige-md);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      padding: 40px 0;
+    }
+
+    .section-label {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--beige-md);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      margin-top: 18px;
+    }
+
+    .section-label:first-child { margin-top: 0; }
+
+    /* ── CONFIGURACIÓN ── */
+    .config-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .toggle-wrap {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .toggle-wrap input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 22px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toggle-slider::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: var(--beige-md);
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .toggle-wrap input:checked + .toggle-slider {
+      background: rgba(45,198,83,0.3);
+    }
+
+    .toggle-wrap input:checked + .toggle-slider::after {
+      transform: translateX(18px);
+      background: var(--green);
+    }
+
+    .config-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--beige);
+      flex: 1;
+    }
+
+    .config-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 11px;
+      color: var(--beige-md);
+      min-width: 28px;
+    }
+
+    .btn-icon {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--beige-md);
+      width: 30px;
+      height: 30px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-icon:hover {
+      border-color: var(--beige-md);
+      color: var(--beige);
+    }
+
+    /* ── SALIDAS ── */
+    .output-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .btn-toggle-out {
+      background: var(--border);
+      border: none;
+      color: var(--beige-md);
+      padding: 6px 14px;
+      border-radius: 3px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      letter-spacing: 0.06em;
+    }
+
+    .btn-toggle-out.on {
+      background: rgba(45,198,83,0.2);
+      color: var(--green);
+    }
+
+    /* ── ALARMAS ── */
+    .alarm-row {
+      padding: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    .alarm-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .alarm-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--beige);
+      flex: 1;
+    }
+
+    .alarm-active-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    .alarm-active-dot.on { background: var(--green); }
+
+    .alarm-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field-label {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--beige-md);
+      text-transform: uppercase;
+    }
+
+    select, input[type="number"], input[type="text"] {
+      background: var(--beige-dk);
+      border: 1px solid var(--border);
+      color: var(--beige);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      padding: 6px 8px;
+      border-radius: 3px;
+      width: 100%;
+      outline: none;
+    }
+
+    select:focus, input:focus {
+      border-color: var(--beige-md);
+    }
+
+    .alarm-notif {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .alarm-notif label {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      color: var(--beige-md);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .alarm-notif input[type="checkbox"] {
+      width: auto;
+      accent-color: var(--green);
+    }
+
+    .btn-save {
+      margin-top: 10px;
+      background: rgba(201,185,154,0.1);
+      border: 1px solid var(--beige-md);
+      color: var(--beige);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 7px 16px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-save:hover { background: rgba(201,185,154,0.2); }
+
+    /* ── INFORMES ── */
+    .report-block {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .report-checks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .report-check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      color: var(--beige);
+      cursor: pointer;
+    }
+
+    .report-check input[type="checkbox"] {
+      width: auto;
+      accent-color: var(--beige-md);
+    }
+
+    .date-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    input[type="date"] {
+      background: var(--beige-dk);
+      border: 1px solid var(--border);
+      color: var(--beige);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      padding: 6px 8px;
+      border-radius: 3px;
+      width: 100%;
+      outline: none;
+      color-scheme: dark;
+    }
+
+    .btn-pdf {
+      width: 100%;
+      background: var(--beige);
+      border: none;
+      color: var(--black);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 12px;
+      border-radius: 3px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: opacity 0.2s;
+    }
+
+    .btn-pdf:hover { opacity: 0.85; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--beige-md);
+      border-radius: 4px;
+      padding: 20px;
+      width: 100%;
+      max-width: 340px;
+    }
+
+    .modal-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--beige);
+      margin-bottom: 14px;
+      letter-spacing: 0.06em;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .btn-cancel {
+      flex: 1;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--beige-md);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 9px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .btn-confirm {
+      flex: 1;
+      background: var(--beige);
+      border: none;
+      color: var(--black);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 9px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--beige);
+      color: var(--black);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 3px;
+      z-index: 300;
+      transition: transform 0.3s;
+      white-space: nowrap;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── UPDATE TIME ── */
+    .update-bar {
+      text-align: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 10px;
+      color: var(--beige-md);
+      letter-spacing: 0.08em;
+      padding: 8px 0 4px;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="eye-wrap">
+    <svg class="eye-svg pulse" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="18" cy="18" rx="16" ry="10" stroke="#C9B99A" stroke-width="1.5"/>
+      <circle cx="18" cy="18" r="6" fill="#1A1A1A" stroke="#C9B99A" stroke-width="1.2"/>
+      <circle id="pupil" cx="18" cy="18" r="5" fill="#F5F0E8"/>
+      <circle cx="20" cy="16" r="1.5" fill="#1A1A1A"/>
+    </svg>
+  </div>
+  <div class="brand">WATCH<span>ALL</span></div>
+  <div class="conn-badge" id="connBadge">OFFLINE</div>
+</header>
+
+<!-- NAV -->
+<nav>
+  <button class="tab active" data-tab="estado" onclick="switchTab('estado',this)">
+    <span class="tab-icon">⬛</span>ESTADO
+  </button>
+  <button class="tab" data-tab="config" onclick="switchTab('config',this)">
+    <span class="tab-icon">⚙️</span>CONFIG
+  </button>
+  <button class="tab" data-tab="alarmas" onclick="switchTab('alarmas',this)">
+    <span class="tab-icon">🔔</span>ALARMAS
+  </button>
+  <button class="tab" data-tab="informes" onclick="switchTab('informes',this)">
+    <span class="tab-icon">📄</span>INFORMES
+  </button>
+</nav>
+
+<main>
+
+  <!-- ═══ ESTADO ═══ -->
+  <div class="screen active" id="screen-estado">
+    <div class="update-bar" id="updateBar">— sin datos —</div>
+    <div id="entradas-estado"></div>
+    <div class="section-label" style="margin-top:20px;">SALIDAS</div>
+    <div id="salidas-estado"></div>
+  </div>
+
+  <!-- ═══ CONFIG ═══ -->
+  <div class="screen" id="screen-config">
+    <div class="section-label">ENTRADAS</div>
+    <div id="config-entradas"></div>
+    <div class="section-label">SALIDAS</div>
+    <div id="config-salidas"></div>
+  </div>
+
+  <!-- ═══ ALARMAS ═══ -->
+  <div class="screen" id="screen-alarmas">
+    <div class="section-label">CONFIGURACIÓN DE ALARMAS</div>
+    <div id="alarmas-list"></div>
+  </div>
+
+  <!-- ═══ INFORMES ═══ -->
+  <div class="screen" id="screen-informes">
+    <div class="section-label">SELECCIONAR ENTRADAS</div>
+    <div class="report-block">
+      <div class="report-checks" id="report-checks"></div>
+      <div class="section-label">RANGO DE FECHAS</div>
+      <div class="date-row">
+        <div class="field-group">
+          <div class="field-label">DESDE</div>
+          <input type="date" id="dateFrom" />
+        </div>
+        <div class="field-group">
+          <div class="field-label">HASTA</div>
+          <input type="date" id="dateTo" />
+        </div>
+      </div>
+      <button class="btn-pdf" onclick="generarPDF()">⬇ EXPORTAR PDF</button>
+    </div>
+
+    <div class="section-label">ÚLTIMOS EVENTOS</div>
+    <div id="eventos-list"></div>
+  </div>
+
+</main>
+
+<!-- MODAL EDITAR NOMBRE -->
+<div class="modal-overlay" id="modalEdit">
+  <div class="modal">
+    <div class="modal-title" id="modalEditTitle">EDITAR ENTRADA</div>
+    <div class="field-group">
+      <div class="field-label">NOMBRE</div>
+      <input type="text" id="modalNameInput" maxlength="24" placeholder="Ej: Presostato línea 1" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modalEdit')">CANCELAR</button>
+      <button class="btn-confirm" onclick="saveEditName()">GUARDAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// ESTADO DEL SISTEMA (simulado)
+// ═══════════════════════════════════════════
+const NUM_ENTRADAS = 6;
+const NUM_SALIDAS  = 2;
+
+let state = {
+  entradas: Array.from({length: NUM_ENTRADAS}, (_, i) => ({
+    id: i + 1,
+    nombre: `IN${i+1}`,
+    activa: false,
+    valor: false,
+    ultimoCambio: null,
+    alarma: {
+      habilitada: false,
+      tipo: 'subida',      // subida | bajada | nivel
+      tiempoMin: 0,        // segundos
+      notificar: true
+    }
+  })),
+  salidas: Array.from({length: NUM_SALIDAS}, (_, i) => ({
+    id: i + 1,
+    nombre: `OUT${i+1}`,
+    valor: false,
+    modo: 'manual',        // manual | impulso
+    impulso: { on: 1, off: 1 }
+  })),
+  eventos: []
+};
+
+// Cargar desde localStorage si existe
+function loadState() {
+  try {
+    const s = localStorage.getItem('watchall_state');
+    if (s) state = JSON.parse(s);
+  } catch(e) {}
+}
+
+function saveState() {
+  try { localStorage.setItem('watchall_state', JSON.stringify(state)); } catch(e) {}
+}
+
+loadState();
+
+// ═══════════════════════════════════════════
+// SIMULACIÓN DE ENTRADAS (demo)
+// ═══════════════════════════════════════════
+function simularEntradas() {
+  state.entradas.forEach(e => {
+    if (!e.activa) return;
+    if (Math.random() < 0.06) {
+      e.valor = !e.valor;
+      e.ultimoCambio = new Date().toISOString();
+      registrarEvento(e);
+    }
+  });
+  renderEstado();
+}
+
+function registrarEvento(entrada) {
+  state.eventos.unshift({
+    id: entrada.id,
+    nombre: entrada.nombre,
+    valor: entrada.valor,
+    ts: new Date().toISOString()
+  });
+  if (state.eventos.length > 200) state.eventos.pop();
+  saveState();
+}
+
+// ═══════════════════════════════════════════
+// NAVEGACIÓN
+// ═══════════════════════════════════════════
+function switchTab(tab, btn) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('screen-' + tab).classList.add('active');
+  btn.classList.add('active');
+  if (tab === 'config')   renderConfig();
+  if (tab === 'alarmas')  renderAlarmas();
+  if (tab === 'informes') renderInformes();
+}
+
+// ═══════════════════════════════════════════
+// RENDER ESTADO
+// ═══════════════════════════════════════════
+function renderEstado() {
+  const cont = document.getElementById('entradas-estado');
+  const activas = state.entradas.filter(e => e.activa);
+
+  if (activas.length === 0) {
+    cont.innerHTML = `<div class="no-entries">Ninguna entrada activa.<br>Ve a CONFIG para habilitarlas.</div>`;
+  } else {
+    cont.innerHTML = activas.map(e => {
+      const cls   = e.valor ? 'high' : 'low';
+      const label = e.valor ? 'HIGH' : 'LOW';
+      const t     = e.ultimoCambio ? formatTime(e.ultimoCambio) : '—';
+      return `
+        <div class="entry-row ${cls}">
+          <span class="entry-num">IN${e.id}</span>
+          <span class="entry-name">${e.nombre}</span>
+          <span class="entry-time">${t}</span>
+          <span class="state-badge ${cls}">${label}</span>
+        </div>`;
+    }).join('');
+  }
+
+  // Salidas en estado
+  const sc = document.getElementById('salidas-estado');
+  sc.innerHTML = state.salidas.map(s => `
+    <div class="entry-row ${s.valor ? 'high' : 'low'}">
+      <span class="entry-num">OUT${s.id}</span>
+      <span class="entry-name">${s.nombre}</span>
+      <span class="entry-time">${s.modo === 'impulso' ? 'IMPULSO' : 'MANUAL'}</span>
+      <span class="state-badge ${s.valor ? 'high' : 'low'}">${s.valor ? 'ON' : 'OFF'}</span>
+    </div>`).join('');
+
+  // Actualizar timestamp
+  document.getElementById('updateBar').textContent =
+    'Actualizado: ' + new Date().toLocaleTimeString('es-ES');
+}
+
+// ═══════════════════════════════════════════
+// RENDER CONFIG
+// ═══════════════════════════════════════════
+function renderConfig() {
+  const ce = document.getElementById('config-entradas');
+  ce.innerHTML = state.entradas.map(e => `
+    <div class="config-row">
+      <span class="config-num">IN${e.id}</span>
+      <label class="toggle-wrap">
+        <input type="checkbox" ${e.activa ? 'checked' : ''}
+          onchange="toggleEntrada(${e.id - 1}, this.checked)" />
+        <span class="toggle-slider"></span>
+      </label>
+      <span class="config-name">${e.nombre}</span>
+      <button class="btn-icon" onclick="openEditModal(${e.id - 1})" title="Editar nombre">✏️</button>
+    </div>`).join('');
+
+  const cs = document.getElementById('config-salidas');
+  cs.innerHTML = state.salidas.map((s, i) => `
+    <div class="output-row">
+      <span class="config-num">OUT${s.id}</span>
+      <span class="config-name">${s.nombre}</span>
+      <select onchange="setSalidaModo(${i}, this.value)" style="max-width:100px;">
+        <option value="manual"  ${s.modo==='manual'  ? 'selected':''}>Manual</option>
+        <option value="impulso" ${s.modo==='impulso' ? 'selected':''}>Impulso</option>
+      </select>
+      <button class="btn-toggle-out ${s.valor ? 'on' : ''}"
+        onclick="toggleSalida(${i})">
+        ${s.valor ? 'ON' : 'OFF'}
+      </button>
+      <button class="btn-icon" onclick="openEditModal(${i}, 'salida')" title="Editar nombre">✏️</button>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// RENDER ALARMAS
+// ═══════════════════════════════════════════
+function renderAlarmas() {
+  const activas = state.entradas.filter(e => e.activa);
+  const cont = document.getElementById('alarmas-list');
+
+  if (activas.length === 0) {
+    cont.innerHTML = `<div class="no-entries">Habilita entradas en CONFIG primero.</div>`;
+    return;
+  }
+
+  cont.innerHTML = activas.map(e => `
+    <div class="alarm-row">
+      <div class="alarm-header">
+        <div class="alarm-active-dot ${e.alarma.habilitada ? 'on' : ''}"></div>
+        <span class="alarm-name">IN${e.id} — ${e.nombre}</span>
+        <label class="toggle-wrap" style="width:36px;height:20px;">
+          <input type="checkbox" ${e.alarma.habilitada ? 'checked' : ''}
+            onchange="toggleAlarma(${e.id-1}, this.checked)" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="alarm-fields">
+        <div class="field-group">
+          <div class="field-label">TRIGGER</div>
+          <select onchange="setAlarmaTipo(${e.id-1}, this.value)">
+            <option value="subida"  ${e.alarma.tipo==='subida'  ? 'selected':''}>↑ Flanco subida</option>
+            <option value="bajada"  ${e.alarma.tipo==='bajada'  ? 'selected':''}>↓ Flanco bajada</option>
+            <option value="nivel"   ${e.alarma.tipo==='nivel'   ? 'selected':''}>⏱ Nivel durante T</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <div class="field-label">T MÍNIMO (seg)</div>
+          <input type="number" min="0" max="3600" value="${e.alarma.tiempoMin}"
+            onchange="setAlarmaTiempo(${e.id-1}, this.value)"
+            ${e.alarma.tipo !== 'nivel' ? 'disabled style="opacity:0.4"' : ''} />
+        </div>
+      </div>
+      <div class="alarm-notif">
+        <label>
+          <input type="checkbox" ${e.alarma.notificar ? 'checked' : ''}
+            onchange="setAlarmaNotif(${e.id-1}, this.checked)" />
+          Enviar mensaje push (Telegram)
+        </label>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// RENDER INFORMES
+// ═══════════════════════════════════════════
+function renderInformes() {
+  const activas = state.entradas.filter(e => e.activa);
+  const checks  = document.getElementById('report-checks');
+
+  checks.innerHTML = activas.map(e => `
+    <label class="report-check">
+      <input type="checkbox" checked value="${e.id}" />
+      IN${e.id} — ${e.nombre}
+    </label>`).join('');
+
+  // Poner fechas por defecto
+  const hoy    = new Date();
+  const hace7  = new Date(); hace7.setDate(hoy.getDate() - 7);
+  document.getElementById('dateTo').value   = hoy.toISOString().split('T')[0];
+  document.getElementById('dateFrom').value = hace7.toISOString().split('T')[0];
+
+  renderEventosList();
+}
+
+function renderEventosList() {
+  const cont = document.getElementById('eventos-list');
+  if (state.eventos.length === 0) {
+    cont.innerHTML = `<div class="no-entries">Sin eventos registrados.</div>`;
+    return;
+  }
+  cont.innerHTML = state.eventos.slice(0, 20).map(ev => `
+    <div class="entry-row ${ev.valor ? 'high' : 'low'}" style="padding:10px 14px;">
+      <span class="entry-num">IN${ev.id}</span>
+      <span class="entry-name" style="font-size:12px;">${ev.nombre}</span>
+      <span class="entry-time">${formatDateTime(ev.ts)}</span>
+      <span class="state-badge ${ev.valor ? 'high' : 'low'}" style="font-size:10px;">
+        ${ev.valor ? '▲ HIGH' : '▼ LOW'}
+      </span>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+// ACCIONES
+// ═══════════════════════════════════════════
+function toggleEntrada(idx, val) {
+  state.entradas[idx].activa = val;
+  saveState();
+  showToast(`IN${idx+1} ${val ? 'habilitada' : 'deshabilitada'}`);
+}
+
+function toggleSalida(idx) {
+  state.salidas[idx].valor = !state.salidas[idx].valor;
+  saveState();
+  renderConfig();
+  renderEstado();
+}
+
+function setSalidaModo(idx, modo) {
+  state.salidas[idx].modo = modo;
+  saveState();
+}
+
+function toggleAlarma(idx, val) {
+  state.entradas[idx].alarma.habilitada = val;
+  saveState();
+  renderAlarmas();
+}
+
+function setAlarmaTipo(idx, tipo) {
+  state.entradas[idx].alarma.tipo = tipo;
+  saveState();
+  renderAlarmas();
+}
+
+function setAlarmaTiempo(idx, val) {
+  state.entradas[idx].alarma.tiempoMin = parseInt(val) || 0;
+  saveState();
+}
+
+function setAlarmaNotif(idx, val) {
+  state.entradas[idx].alarma.notificar = val;
+  saveState();
+}
+
+// ─── MODAL EDITAR NOMBRE ───
+let editTarget = null;
+
+function openEditModal(idx, tipo = 'entrada') {
+  editTarget = { idx, tipo };
+  const obj = tipo === 'entrada' ? state.entradas[idx] : state.salidas[idx];
+  const prefix = tipo === 'entrada' ? `IN${obj.id}` : `OUT${obj.id}`;
+  document.getElementById('modalEditTitle').textContent = `EDITAR ${prefix}`;
+  document.getElementById('modalNameInput').value = obj.nombre;
+  document.getElementById('modalEdit').classList.add('open');
+  setTimeout(() => document.getElementById('modalNameInput').focus(), 100);
+}
+
+function saveEditName() {
+  const val = document.getElementById('modalNameInput').value.trim();
+  if (!val) { showToast('El nombre no puede estar vacío'); return; }
+  if (editTarget.tipo === 'entrada') {
+    state.entradas[editTarget.idx].nombre = val;
+  } else {
+    state.salidas[editTarget.idx].nombre = val;
+  }
+  saveState();
+  closeModal('modalEdit');
+  showToast('Nombre guardado');
+  renderConfig();
+  renderEstado();
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// ─── PDF ───
+function generarPDF() {
+  const checks  = document.querySelectorAll('#report-checks input:checked');
+  const ids     = Array.from(checks).map(c => parseInt(c.value));
+  const desde   = document.getElementById('dateFrom').value;
+  const hasta   = document.getElementById('dateTo').value;
+
+  if (ids.length === 0) { showToast('Selecciona al menos una entrada'); return; }
+  if (!desde || !hasta)  { showToast('Selecciona el rango de fechas'); return; }
+
+  const eventos = state.eventos.filter(ev => {
+    if (!ids.includes(ev.id)) return false;
+    const d = ev.ts.split('T')[0];
+    return d >= desde && d <= hasta;
+  });
+
+  // Generar PDF simple via ventana de impresión
+  const html = buildPDFHtml(ids, desde, hasta, eventos);
+  const win  = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(() => win.print(), 500);
+}
+
+function buildPDFHtml(ids, desde, hasta, eventos) {
+  const entradas = ids.map(id => state.entradas[id-1]);
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>WATCHALL — Informe</title>
+    <style>
+      body { font-family: monospace; font-size: 12px; color: #111; padding: 20px; }
+      h1 { font-size: 18px; margin-bottom: 4px; }
+      .sub { color: #666; margin-bottom: 16px; font-size: 11px; }
+      table { width: 100%; border-collapse: collapse; }
+      th { background: #222; color: #fff; padding: 6px 8px; text-align: left; font-size: 11px; }
+      td { padding: 5px 8px; border-bottom: 1px solid #ddd; font-size: 11px; }
+      tr:nth-child(even) td { background: #f5f5f5; }
+      .high { color: #1a7a3a; font-weight: bold; }
+      .low  { color: #c0392b; font-weight: bold; }
+    </style></head><body>
+    <h1>⬛ WATCHALL — Informe de Eventos</h1>
+    <div class="sub">
+      Entradas: ${entradas.map(e => `IN${e.id}·${e.nombre}`).join(' | ')}<br>
+      Periodo: ${desde} → ${hasta} | Generado: ${new Date().toLocaleString('es-ES')}
+    </div>
+    ${eventos.length === 0 ? '<p>Sin eventos en el periodo seleccionado.</p>' : `
+    <table>
+      <tr><th>FECHA/HORA</th><th>ENTRADA</th><th>NOMBRE</th><th>ESTADO</th></tr>
+      ${eventos.map(ev => `
+        <tr>
+          <td>${formatDateTime(ev.ts)}</td>
+          <td>IN${ev.id}</td>
+          <td>${ev.nombre}</td>
+          <td class="${ev.valor ? 'high' : 'low'}">${ev.valor ? '▲ HIGH' : '▼ LOW'}</td>
+        </tr>`).join('')}
+    </table>`}
+    </body></html>`;
+}
+
+// ─── UTILS ───
+function formatTime(iso) {
+  try { return new Date(iso).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit', second:'2-digit'}); }
+  catch(e) { return '—'; }
+}
+
+function formatDateTime(iso) {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit'}) + ' ' +
+           d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  } catch(e) { return '—'; }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── BADGE CONEXIÓN (simulado) ───
+function updateConnBadge() {
+  const badge = document.getElementById('connBadge');
+  // Simulado: alterna para demo
+  const online = Math.random() > 0.3;
+  badge.textContent = online ? '4G ●' : 'OFFLINE';
+  badge.className   = 'conn-badge' + (online ? ' online' : '');
+}
+
+// ─── INIT ───
+renderEstado();
+updateConnBadge();
+setInterval(simularEntradas, 3000);
+setInterval(updateConnBadge, 15000);
+</script>
+
+<!-- SERVICE WORKER -->
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+</script>
+</body>
+</html>
